@@ -1,0 +1,14 @@
+Nama: Nasykhariyanda Pratama
+nim: 205410181
+
+ jawaban:
+1. Teorema CAP adalah prinsip yang memaksa sistem terdistribusi memilih antara 
+	Konsistensi (CP) atau Ketersediaan (AP) saat terjadi partisi jaringan (P), 
+	di mana filosofi BASE (Basically Available, Soft state, Eventually consistent) 
+	adalah model yang mengimplementasikan pilihan AP dengan mengorbankan konsistensi instan demi ketersediaan.
+
+2. Sementara itu, GraphQL bukanlah mekanisme Komunikasi Antar Proses (IPC) seperti HTTP atau gRPC, 
+	melainkan sebuah query language API yang bertindak sebagai lapisan abstraksi; ia menggunakan mekanisme IPC tersebut 
+	untuk menerjemahkan satu kueri dari klien menjadi beberapa panggilan ke berbagai microservice di backend dan menggabungkan hasilnya.
+
+3.
