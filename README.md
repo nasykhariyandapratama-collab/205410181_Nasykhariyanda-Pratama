@@ -9,124 +9,22 @@ Repository ini berisi ringkasan jawaban dari 3 soal:
 ---
 
 ## 1. Teorema CAP dan BASE + Keterkaitannya
+- Teorema CAP adalah prinsip yang memaksa sistem terdistribusi memilih antara Konsistensi (CP) atau Ketersediaan (AP) saat terjadi partisi jaringan (P), di mana filosofi BASE (Basically Available, Soft state, Eventually consistent) adalah model yang mengimplementasikan pilihan AP dengan mengorbankan konsistensi instan demi ketersediaan.
 
-### 1.1. Teorema CAP
-
-**CAP theorem** (Eric Brewer) menyatakan bahwa dalam sistem terdistribusi, terutama saat terjadi **network partition (P)**, kita **tidak bisa mendapatkan Consistency (C) dan Availability (A) secara bersamaan**. Kita dipaksa memilih:
-
-- **C – Consistency**  
-  Semua node memberikan data yang **sama dan terbaru**. Setiap `read` setelah `write` akan melihat hasil terbaru (strong consistency).
-
-- **A – Availability**  
-  Setiap request ke sistem selalu mendapat **response** (tidak error/timeout), walaupun mungkin datanya tidak paling baru.
-
-- **P – Partition tolerance**  
-  Sistem tetap berjalan meskipun ada pemisahan jaringan antar node (node-node tidak bisa saling berkomunikasi).
-
-Saat **partition terjadi**, pilihan praktisnya:
-
-- **CP (Consistency + Partition tolerance)**  
-  Prioritaskan konsistensi; sistem boleh mengorbankan availability (misalnya menolak request sampai cluster sehat).
-
-- **AP (Availability + Partition tolerance)**  
-  Prioritaskan availability; sistem boleh mengorbankan konsistensi kuat dan menerima **eventual consistency**.
-
-#### Contoh singkat
-
-- **Sistem perbankan (transfer uang)**  
-  Biasanya memilih **CP**:  
-  Lebih baik menolak transaksi ketika jaringan bermasalah daripada saldo nasabah jadi salah.
-
-- **Feed media sosial / katalog produk**  
-  Biasanya memilih **AP**:  
-  Lebih penting pengguna bisa lihat konten meskipun kadang data sedikit telat (stale).
-
----
-
-### 1.2. BASE (Basically Available, Soft state, Eventual consistency)
-
-**BASE** adalah pendekatan praktis untuk sistem yang memilih **AP** pada CAP.
-
-Kepanjangannya:
-
-- **Basically Available**  
-  Sistem berusaha **selalu merespons**, walaupun mungkin datanya belum konsisten.
-
-- **Soft state**  
-  State (data) bisa berubah seiring waktu, bahkan tanpa interaksi langsung dari client, karena adanya **replication** atau **background process**.
-
-- **Eventual consistency**  
-  Jika tidak ada lagi update, **pada akhirnya** semua node akan **konvergen ke nilai yang sama**.
-
-#### Contoh singkat
-
-- **Jumlah like pada postingan sosmed**  
-  Ketika user menekan like:
-  - Update dikirim ke beberapa node.
-  - Sementara, node lain mungkin belum menerima update → nilai like yang ditampilkan bisa berbeda antar user.
-  - Setelah beberapa saat (replication selesai), semua node menampilkan nilai yang sama.
-
----
-
-### 1.3. Keterkaitan CAP dan BASE
-
-- **CAP**: teori batasan yang mengatakan bahwa ketika ada partition, Anda harus memilih antara **C** atau **A** (dengan tetap mendukung P).
-- **BASE**: filosofi desain ketika kita memilih **Availability + Partition tolerance (AP)** dan **melonggarkan Consistency menjadi Eventual consistency**.
-
-Jadi:
-
-- Sistem **AP** pada CAP biasanya diimplementasikan dengan prinsip **BASE**.
-- Sistem **CP** cenderung menjaga **strong consistency**, tetapi mungkin mengorbankan availability saat terjadi masalah jaringan.
-
----
-
-### 1.4. Contoh Kombinasi dalam Sistem Nyata
-
-- **E-commerce**:
-  - **Katalog produk** (nama, deskripsi, image) → bisa AP/BASE: tidak masalah kalau update terlambat sedikit.
-  - **Stock barang untuk checkout** → cenderung CP: tidak boleh oversell.
-
-- **Arsitektur hibrid**:
-  - Gunakan database AP (mis. NoSQL) untuk read-heavy dan non-kritis.
-  - Gunakan database CP (mis. PostgreSQL) untuk transaksi yang sangat penting (uang, stok, dsb).
-
+Lokasi jawaban:
+[`soal%20no%201/cap.MD`](soal%20no%201/cap.MD)
 ---
 
 ## 2. GraphQL & Komunikasi Antar Proses di Sistem Terdistribusi
 
-### 2.1. Peran GraphQL
+### 2.1. GraphQL
+- Sementara itu, GraphQL bukanlah mekanisme Komunikasi Antar Proses (IPC) seperti HTTP atau gRPC, melainkan sebuah query language API yang bertindak sebagai lapisan abstraksi; ia menggunakan mekanisme IPC tersebut untuk menerjemahkan satu kueri dari klien menjadi beberapa panggilan ke berbagai microservice di backend dan menggabungkan hasilnya.
 
-**GraphQL** adalah:
+Lokasi jawaban:
+[`soal%20no%202/GraphQL.md`](soal%20no%202/GraphQL.md)
 
-- **Query language** untuk API.
-- **Runtime** untuk mengeksekusi query tersebut terhadap data Anda.
-
-Dalam sistem terdistribusi (misalnya microservices), GraphQL sering dipakai sebagai **gateway** atau **API aggregator**:
-
-- Client mengirim **satu** query GraphQL.
-- GraphQL server (gateway) akan:
-  - Memanggil **banyak service** di backend (REST/gRPC/database/message broker).
-  - Menggabungkan hasilnya.
-  - Mengembalikan satu response ke client.
-
-Ini secara langsung berkaitan dengan **komunikasi antar proses (IPC)**:
-
-- Antar proses dalam sistem terdistribusi (microservices) saling komunikasi melalui:
-  - HTTP/REST
-  - gRPC
-  - Message broker (Kafka, RabbitMQ, dsb)
-- GraphQL berada di **lapisan depan**, bertindak sebagai **orchestrator** untuk calls tersebut.
-
-### 2.2. Alur Sederhana
-
-1. Client mengirim query GraphQL:
-   ```graphql
-   query {
-     user(id: "123") {
-       name
-       orders {
-         id
-         total
-       }
-     }
-   }
+## 3. PostgreSQL Streaming Replication
+- Untuk membuat streaming replication sinkron di PostgreSQL menggunakan Docker Compose, Anda perlu mendefinisikan dua layanan: primary dan standby. Layanan primary dikonfigurasi melalui postgresql.conf untuk mengaktifkan replikasi (wal_level = replica) dan memaksakan mode sinkron (synchronous_commit = on serta synchronous_standby_names). Layanan standby menggunakan skrip entrypoint khusus untuk menunggu primary siap, lalu menjalankan pg_basebackup untuk mengkloning data, dan terakhir memulai sebagai standby dengan application_name yang sesuai. Hasilnya adalah penyiapan di mana primary akan menahan (hang) transaksi COMMIT jika standby mati, ini membuktikan bahwa sinkronisasi data (konsistensi) diprioritaskan di atas ketersediaan (prinsip CP dari Teorema CAP).
+  
+Lokasi jawaban:
+[`soal%20no%203/PostgreSQL%20Streaming%20Replication.md`](soal%20no%203/PostgreSQL%20Streaming%20Replication.md)
