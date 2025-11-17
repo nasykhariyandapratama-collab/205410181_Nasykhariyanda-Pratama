@@ -59,6 +59,18 @@ BASE adalah prinsip yang sering dipakai di sistem yang memilih **AP** pada CAP.
 
 **Contoh kombinasi di dunia nyata:**
 
-- **Aplikasi e-commerce**  
-  - Data katalog (nama produk, deskripsi) bisa pakai pendekatan BASE (AP): boleh sedikit stale.  
-  - Data transaksi dan stok saat checkout butuh konsistensi kuat → cenderung CP.
+#### 🛒 Contoh: Sistem Stok E-commerce saat Flash Sale
+
+Contoh yang pernah saya gunakan (atau sering ditemui) adalah **sistem manajemen stok pada platform *e-commerce*** saat *flash sale*.
+
+* **Skenario:** Ada 10 unit "Produk A" yang dijual. Ribuan pengguna mencoba membelinya secara bersamaan. Server-server *database replica* tersebar di berbagai wilayah.
+* **Pilihan Sistem (AP/BASE):**
+    * Platform *e-commerce* tidak ingin *website*-nya *down* atau menampilkan *error* "server sibuk" saat *flash sale*. Mereka harus memilih **Availability (A)**.
+    * Mereka tahu jaringan bisa lambat atau putus antar *data center* (*Partition Tolerance*).
+    * Oleh karena itu, mereka terpaksa mengorbankan **Consistency (C)**.
+* **Implementasi BASE dalam Aksi:**
+    1.  **Basically Available:** *Website* tetap merespons. 100 pengguna mungkin berhasil memasukkan "Produk A" ke keranjang mereka, meskipun stok aslinya hanya 10. Sistem selalu tersedia untuk menerima permintaan "masukkan ke keranjang".
+    2.  **Soft State:** Status "Produk A di keranjang Anda" adalah *soft state*. Sistem belum benar-benar mengalokasikan stok itu untuk Anda. Itu hanya catatan *intent* (niat) Anda untuk membeli.
+    3.  **Eventually Consistent:** Saat pengguna mencoba *checkout*, sistem akan melakukan pemeriksaan ulang ke *database* utama (sumber kebenaran). Pada titik ini, hanya 10 pengguna pertama yang akan berhasil, sementara 90 lainnya akan mendapatkan pesan "Maaf, stok habis" di halaman *checkout*. Sistem pada akhirnya menjadi konsisten (stok 0) setelah semua transaksi diproses.
+
+---
